@@ -1,0 +1,10 @@
+{
+  "name": "ai-customer-purchase-forecasting-dashboard",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Enterprise AI-Based Customer Purchase Forecasting & Executive Analytics Dashboard",
+  "scripts": {
+    "build": "cd frontend && npm install && npm run build",
+    "start": "python dashboard_api.py"
+  }
+}

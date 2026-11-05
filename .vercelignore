@@ -1,0 +1,13 @@
+# Ignore large local datasets, virtual environments, and build artifacts from Vercel deployments
+.venv
+node_modules
+frontend/node_modules
+online_retail_II.xlsx
+training.json.gz
+practice.json.gz
+competition_twist
+FINAL_SUBMISSION
+hackathon_final_submission.zip
+.git
+.vscode
+*.bat

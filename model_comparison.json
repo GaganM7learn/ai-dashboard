@@ -1,0 +1,32 @@
+{
+  "Ridge (lambda=10.0, baseline)": {
+    "n_customers": 1940,
+    "initial_score": 80.21038155783538,
+    "post_twist_score": 69.1781596118371,
+    "brier_error": 0.16076666310309282,
+    "value_mse": 72832.55589474228,
+    "value_mae": 157.23707216494844,
+    "value_rmse": 269.8750746081273,
+    "selection_capture": 0.5729097417056557
+  },
+  "Optimized Ridge (lambda=5.0)": {
+    "n_customers": 1940,
+    "initial_score": 80.29536023581429,
+    "post_twist_score": 69.26236381423313,
+    "brier_error": 0.16076291305670107,
+    "value_mse": 72838.3700716495,
+    "value_mae": 157.35016494845362,
+    "value_rmse": 269.88584637147886,
+    "selection_capture": 0.5757388177873238
+  },
+  "Logistic Regression + Ridge": {
+    "n_customers": 1940,
+    "initial_score": 80.30089528983491,
+    "post_twist_score": 69.26789886825378,
+    "brier_error": 0.16062453670618557,
+    "value_mse": 72838.3700716495,
+    "value_mae": 0.0,
+    "value_rmse": 269.88584637147886,
+    "selection_capture": 0.5757388177873238
+  }
+}

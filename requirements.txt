@@ -1,0 +1,8 @@
+# Python runtime dependencies for Customer Intelligence AI Backend & Vercel Serverless
+fastapi>=0.115.0
+pydantic>=2.10.0
+uvicorn>=0.30.0
+joblib>=1.4.0
+numpy>=1.26.0
+pandas>=2.2.0
+python-multipart>=0.0.12

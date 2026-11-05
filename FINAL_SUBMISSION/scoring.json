@@ -1,0 +1,28 @@
+{
+  "competition_name": "AI-Based Customer Purchase Forecasting Challenge",
+  "version": "1.0",
+  "target_window_days": 30,
+  "currency": "GBP",
+  "value_rules": {
+    "cap": 2000.0,
+    "min_value": 0.0,
+    "rounding_decimals": 2,
+    "rounding_mode": "ROUND_HALF_UP"
+  },
+  "selection_rules": {
+    "budget_percentage": 0.20,
+    "budget_min": 1,
+    "budget_max": 20,
+    "only_eligible": true,
+    "ranking_score": "expected_business_value"
+  },
+  "metrics": {
+    "probability_brier_weight": 0.35,
+    "probability_auc_weight": 0.25,
+    "value_wape_weight": 0.20,
+    "shortlist_profit_weight": 0.20
+  },
+  "cost_per_contact": 5.0,
+  "profit_margin": 0.25
+}
+
