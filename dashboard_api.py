@@ -741,6 +741,8 @@ if os.path.exists(frontend_dist_path):
 
 if __name__ == "__main__":
     import threading
+    import time
+    import webbrowser
     import uvicorn
 
     def start_secondary_server(port: int):
@@ -753,6 +755,17 @@ if __name__ == "__main__":
     for alt_port in [8080, 3000]:
         t = threading.Thread(target=start_secondary_server, args=(alt_port,), daemon=True)
         t.start()
+
+    # Automatically launch default web browser (Chrome) after server initializes
+    def auto_open_browser():
+        time.sleep(1.5)
+        try:
+            print("[INFO] Launching Dashboard in browser: http://localhost:8000")
+            webbrowser.open("http://localhost:8000")
+        except Exception as err:
+            print(f"[Notice] Browser launch: {err}")
+
+    threading.Thread(target=auto_open_browser, daemon=True).start()
 
     print("=" * 70)
     print(" CUSTOMER INTELLIGENCE AI: DASHBOARD ONLINE")

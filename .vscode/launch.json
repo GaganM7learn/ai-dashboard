@@ -1,0 +1,21 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "🚀 Run AI Dashboard (Opens in Chrome)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/dashboard_api.py",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+            "justMyCode": true
+        },
+        {
+            "name": "🌐 Open Chrome to http://localhost:8000",
+            "type": "chrome",
+            "request": "launch",
+            "url": "http://localhost:8000",
+            "webRoot": "${workspaceFolder}/frontend/dist"
+        }
+    ]
+}

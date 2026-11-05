@@ -23,6 +23,7 @@ online_retail_II.xlsx
 # Editor & System Files
 .vscode/*
 !.vscode/settings.json
+!.vscode/launch.json
 !.vscode/extensions.json
 .idea/
 *.swp
@@ -38,3 +39,5 @@ Thumbs.db
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+.vercel
