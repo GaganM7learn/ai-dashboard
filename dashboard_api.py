@@ -194,8 +194,10 @@ def get_cached_predictions() -> Dict[str, Any]:
     if "data" in _CACHE:
         return _CACHE["data"]
 
-    # 0. Check pre-computed fast disk cache (instant 40ms load)
+    # 0. Check pre-computed fast disk cache (instant load)
     search_paths = [
+        "cached_dashboard_data.json",
+        os.path.join(os.path.dirname(os.path.abspath(__file__)), "cached_dashboard_data.json"),
         "cached_dashboard_data.joblib",
         os.path.join(os.path.dirname(os.path.abspath(__file__)), "cached_dashboard_data.joblib"),
         os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "cached_dashboard_data.joblib"),
@@ -204,8 +206,12 @@ def get_cached_predictions() -> Dict[str, Any]:
     for p in search_paths:
         if p and os.path.exists(p):
             try:
-                import joblib
-                _CACHE["data"] = joblib.load(p)
+                if p.endswith(".json"):
+                    with open(p, "r", encoding="utf-8") as f:
+                        _CACHE["data"] = json.load(f)
+                else:
+                    import joblib
+                    _CACHE["data"] = joblib.load(p)
                 return _CACHE["data"]
             except Exception as e:
                 print(f"[Notice] Could not load {p}: {e}")
@@ -308,30 +314,37 @@ def get_predictions(
     data = get_cached_predictions()
     customers = data["customers"]
 
+    # Normalize parameters if invoked directly outside FastAPI injection
+    q_val = str(q).strip() if (q is not None and not hasattr(q, "default") and isinstance(q, str)) else None
+    tier_val = str(tier).strip() if (tier is not None and not hasattr(tier, "default") and isinstance(tier, str)) else None
+    selected_val = str(selected).strip() if (selected is not None and not hasattr(selected, "default") and isinstance(selected, str)) else None
+    page_num = page if isinstance(page, int) else 1
+    p_size = page_size if isinstance(page_size, int) else 25
+
     # Filter by search
     filtered = customers
-    if q:
-        q_lower = q.lower().strip()
+    if q_val:
+        q_lower = q_val.lower()
         filtered = [c for c in filtered if q_lower in c["customer_id"].lower() or q_lower in c["customer_category"].lower()]
 
     # Filter by probability tier
-    if tier and tier != "All":
-        filtered = [c for c in filtered if c["probability_tier"].lower() == tier.lower()]
+    if tier_val and tier_val != "All":
+        filtered = [c for c in filtered if c["probability_tier"].lower() == tier_val.lower()]
 
     # Filter by selection status
-    if selected and selected != "All":
-        is_sel = selected.lower() == "selected" or selected.lower() == "true"
+    if selected_val and selected_val != "All":
+        is_sel = selected_val.lower() == "selected" or selected_val.lower() == "true"
         filtered = [c for c in filtered if c["is_selected"] == is_sel]
 
     total_count = len(filtered)
-    start_idx = (page - 1) * page_size
-    paged = filtered[start_idx : start_idx + page_size]
+    start_idx = (page_num - 1) * p_size
+    paged = filtered[start_idx : start_idx + p_size]
 
     return {
         "total": total_count,
-        "page": page,
-        "page_size": page_size,
-        "total_pages": math.ceil(total_count / page_size),
+        "page": page_num,
+        "page_size": p_size,
+        "total_pages": math.ceil(total_count / p_size),
         "customers": paged
     }
 
