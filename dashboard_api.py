@@ -740,40 +740,66 @@ if os.path.exists(frontend_dist_path):
 
 
 if __name__ == "__main__":
+    import os
+    import socket
+    import subprocess
     import threading
     import time
     import webbrowser
     import uvicorn
 
-    def start_secondary_server(port: int):
+    def is_port_in_use(port: int) -> bool:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            return s.connect_ex(("127.0.0.1", port)) == 0
+
+    def free_port(port: int):
+        """Frees the target port by terminating any old orphaned server instance."""
         try:
-            uvicorn.run("dashboard_api:app", host="0.0.0.0", port=port, log_level="warning")
-        except Exception as e:
-            print(f"[Notice] Alternate port {port} listener: {e}")
+            curr_pid = os.getpid()
+            cmd = f"netstat -ano | findstr :{port}"
+            output = subprocess.check_output(cmd, shell=True).decode()
+            for line in output.strip().splitlines():
+                parts = line.split()
+                if len(parts) >= 5 and "LISTENING" in parts:
+                    pid = int(parts[-1])
+                    if pid != curr_pid and pid > 0:
+                        print(f"[INFO] Freeing port {port} (terminating old server PID {pid})...")
+                        subprocess.call(f"taskkill /F /PID {pid}", shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                        time.sleep(0.5)
+        except Exception:
+            pass
 
-    # Spawn alternate port listeners (8080, 3000) so any common dashboard port works
-    for alt_port in [8080, 3000]:
-        t = threading.Thread(target=start_secondary_server, args=(alt_port,), daemon=True)
-        t.start()
+    # Ensure port 8000 is clean, or fallback gracefully
+    target_port = 8000
+    if is_port_in_use(target_port):
+        free_port(target_port)
 
-    # Automatically launch default web browser (Chrome) after server initializes
-    def auto_open_browser():
-        time.sleep(1.5)
+    if is_port_in_use(target_port):
+        for candidate in [8080, 8081, 8001, 8002]:
+            if not is_port_in_use(candidate):
+                target_port = candidate
+                break
+
+    url = f"http://localhost:{target_port}"
+
+    # Automatically launch Google Chrome after server starts
+    def auto_open_chrome():
+        time.sleep(1.2)
         try:
-            print("[INFO] Launching Dashboard in browser: http://localhost:8000")
-            webbrowser.open("http://localhost:8000")
-        except Exception as err:
-            print(f"[Notice] Browser launch: {err}")
+            print(f"[INFO] Opening dashboard in Google Chrome: {url}")
+            res = subprocess.call(f'start chrome "{url}"', shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            if res != 0:
+                webbrowser.open(url)
+        except Exception:
+            webbrowser.open(url)
 
-    threading.Thread(target=auto_open_browser, daemon=True).start()
+    threading.Thread(target=auto_open_chrome, daemon=True).start()
 
     print("=" * 70)
     print(" CUSTOMER INTELLIGENCE AI: DASHBOARD ONLINE")
-    print(" Primary URL:    http://localhost:8000   (or http://127.0.0.1:8000)")
-    print(" Alternate URL:  http://localhost:8080   (or http://127.0.0.1:8080)")
-    print(" Web App URL:    http://localhost:3000   (or http://127.0.0.1:3000)")
+    print(f" Web URL:        {url}   (or http://127.0.0.1:{target_port})")
     print(" Network Host:   0.0.0.0 (All local interfaces, IPv4 & IPv6)")
+    print(" Press Ctrl+C in this terminal to stop the server.")
     print("=" * 70)
 
-    # Primary server on 8000
-    uvicorn.run("dashboard_api:app", host="0.0.0.0", port=8000, log_level="info")
+    uvicorn.run("dashboard_api:app", host="0.0.0.0", port=target_port, log_level="info")
