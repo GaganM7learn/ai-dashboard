@@ -195,14 +195,20 @@ def get_cached_predictions() -> Dict[str, Any]:
         return _CACHE["data"]
 
     # 0. Check pre-computed fast disk cache (instant 40ms load)
-    cache_joblib = "cached_dashboard_data.joblib"
-    if os.path.exists(cache_joblib):
-        try:
-            import joblib
-            _CACHE["data"] = joblib.load(cache_joblib)
-            return _CACHE["data"]
-        except Exception as e:
-            print(f"[Notice] Could not load {cache_joblib}: {e}")
+    search_paths = [
+        "cached_dashboard_data.joblib",
+        os.path.join(os.path.dirname(os.path.abspath(__file__)), "cached_dashboard_data.joblib"),
+        os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "cached_dashboard_data.joblib"),
+        os.path.join(os.getcwd(), "cached_dashboard_data.joblib"),
+    ]
+    for p in search_paths:
+        if p and os.path.exists(p):
+            try:
+                import joblib
+                _CACHE["data"] = joblib.load(p)
+                return _CACHE["data"]
+            except Exception as e:
+                print(f"[Notice] Could not load {p}: {e}")
 
     # 1. Prioritize real retail dataset if available
     excel_path = "online_retail_II.xlsx"
